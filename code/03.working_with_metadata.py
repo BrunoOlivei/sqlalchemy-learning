@@ -1,12 +1,20 @@
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import DeclarativeBase
 
 engine = create_engine('sqlite:///:memory:', echo=True)
 
-'''
 metadata_obj = MetaData()
 
+with engine.connect() as conn:
+    conn.execute(text("CREATE TABLE some_table (x int, y int)"))
+    conn.execute(
+        text("INSERT INTO some_table (x, y) VALUES (:x, :y)"),
+        [{"x": 1, "y": 1}, {"x": 2, "y": 4}],
+    )
+    conn.commit()
+
+'''
 # Creating Tables
 
 user_table = Table(
@@ -75,3 +83,10 @@ class Address(Base):
     def __repr__(self) -> str:
         return f"Address(id={self.id!r}, email_address={self.email_address!r})"
 
+
+Base.metadata.create_all(engine)
+
+
+some_table = Table("some_table", metadata_obj, autoload_with=engine)
+
+print(some_table.c)

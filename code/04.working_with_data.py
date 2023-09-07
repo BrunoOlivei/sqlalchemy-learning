@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey
-from sqlalchemy import create_engine, insert, select
+from sqlalchemy import create_engine, insert, select, func
 from sqlalchemy.orm import Session, DeclarativeBase, Mapped, mapped_column, \
     relationship
 # from sqlalchemy import select, bindparam
@@ -134,3 +134,12 @@ with Session(engine) as session:
     user = session.scalars(select(User)).first()
     print("Print from User table:")
     print(user)
+
+
+print(
+    func.unnest(
+        func.percentile_disc([0.25, 0.5, 0.75, 1]).within_group(
+            user_table.c.name
+        )
+    )
+)
